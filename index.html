@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hackathon Auth</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+    body{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(135deg,#141e30,#243b55);
+    }
+    .auth-box{
+      width:380px;
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.25);
+      overflow:hidden;
+      animation:fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+    
+    .tabs{display:flex;border-bottom:1px solid #ddd;}
+    .tab{
+      flex:1;text-align:center;padding:15px;font-weight:600;cursor:pointer;color:#555;transition:0.3s;
+    }
+    .tab.active{color:#2575fc;border-bottom:3px solid #2575fc;background:#f9f9f9;}
+    form{padding:25px;display:none;animation:fadeEffect 0.5s;}
+    @keyframes fadeEffect{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    form.active{display:block;}
+    
+    h2{text-align:center;margin-bottom:20px;color:#333;font-size:22px;}
+    .input-group{margin-bottom:15px;}
+    .input-group label{display:block;margin-bottom:6px;font-size:14px;color:#444;}
+    .input-group input{
+      width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:14px;transition:0.3s;
+    }
+    .input-group input:focus{border-color:#2575fc;box-shadow:0 0 5px rgba(37,117,252,0.5);}
+    .btn{
+      width:100%;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,#2575fc,#6a11cb);
+      color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:0.3s;
+    }
+    .btn:hover{opacity:0.95;transform:scale(1.02);}
+    .extra-links{text-align:center;margin-top:15px;font-size:13px;}
+    .extra-links a{color:#2575fc;text-decoration:none;cursor:pointer;}
+    .extra-links a:hover{text-decoration:underline;}
+    .success{text-align:center;padding:30px;}
+    .success h3{margin-bottom:10px;color:#333;font-size:22px;}
+    .success p{color:#555;margin-bottom:20px;}
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" id="loginTab">Login</div>
+      <div class="tab" id="signupTab">Sign Up</div>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="active">
+      <h2>Welcome Back</h2>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" required>
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" required>
+      </div>
+      <button type="submit" class="btn">Login</button>
+      <div class="extra-links">
+        Don’t have an account? <a id="goToSignup">Sign Up</a>
+      </div>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signupForm">
+      <h2>Create Account</h2>
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" required>
+      </div>
+      <button type="submit" class="btn">Sign Up</button>
+      <div class="extra-links">
+        Already have an account? <a id="goToLogin">Login</a>
+      </div>
+    </form>
+
+    <!-- Success Screen -->
+    <div id="successScreen" class="success" style="display:none;">
+      <h3>Welcome 🎉</h3>
+      <p id="userName"></p>
+      <button class="btn" id="logout">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const successScreen = document.getElementById("successScreen");
+    const userName = document.getElementById("userName");
+
+    // Tab switching
+    function showLogin(){
+      loginTab.classList.add("active");
+      signupTab.classList.remove("active");
+      loginForm.classList.add("active");
+      signupForm.classList.remove("active");
+    }
+    function showSignup(){
+      signupTab.classList.add("active");
+      loginTab.classList.remove("active");
+      signupForm.classList.add("active");
+      loginForm.classList.remove("active");
+    }
+    loginTab.onclick = showLogin;
+    signupTab.onclick = showSignup;
+    document.getElementById("goToSignup").onclick = showSignup;
+    document.getElementById("goToLogin").onclick = showLogin;
+
+    // Clear old data (for fresh start every reload in demo)
+    // 👉 Isko sirf demo ke liye rakha hai, real project me hata dena
+    localStorage.removeItem("user");
+
+    // Signup
+    signupForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      localStorage.setItem("user", JSON.stringify({name,email,password}));
+      alert("✅ Account created! Please login now.");
+      showLogin();
+    });
+
+    // Login
+    loginForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      if(!user){
+        alert("⚠ Please sign up first before logging in.");
+        showSignup();
+        return;
+      }
+
+      if(user.email === email && user.password === password){
+        loginForm.style.display="none";
+        signupForm.style.display="none";
+        document.querySelector(".tabs").style.display="none";
+        successScreen.style.display="block";
+        userName.innerText = "Hello, " + user.name + " 👋";
+      } else {
+        alert("❌ Invalid credentials. Try again!");
+      }
+    });
+
+    // Logout
+    document.getElementById("logout").onclick = () => {
+      successScreen.style.display="none";
+      loginForm.style.display="block";
+      document.querySelector(".tabs").style.display="flex";
+      showLogin();
+    };
+  </script>
+</body>
+</html>
